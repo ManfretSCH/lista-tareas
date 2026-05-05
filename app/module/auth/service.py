@@ -1,8 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.core.security import get_hash_password,verify_password
-from schemas import UserCreate, UserLogin
-from repository import get_user_by_email, create_user_repo
+from app.module.auth.schemas import UserCreate, UserLogin
+from app.module.auth.repository import get_user_by_email, create_user_repo
 
 def create_user(user: UserCreate, db: Session):
     user_existing = get_user_by_email(user.email, db)

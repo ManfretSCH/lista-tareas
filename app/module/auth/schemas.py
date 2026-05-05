@@ -11,5 +11,5 @@ class UserLogin(BaseModel):
 
 
 class Token(BaseModel):
-    accses_token: str
-    type_token: str = "Bearer"
+    token: str
+    type: str = "Bearer"
