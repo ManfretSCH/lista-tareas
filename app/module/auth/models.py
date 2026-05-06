@@ -10,6 +10,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(50), unique=True)
     password: Mapped[str] = mapped_column(String(100))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    tasks = Mapped[list('Task')] = relationship(back_populates='tasks')
+    tasks: Mapped[list["Task"]] = relationship(back_populates="user")
+
 
 
