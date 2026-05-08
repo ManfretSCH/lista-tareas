@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class CreateTask(BaseModel):
     name: str
@@ -11,4 +12,8 @@ class TaskResponse(BaseModel):
     user_id: int
 
     model_config = {"from_attributes": True}
+
+class TaskUpdate(BaseModel):
+    name: str
+    description: str
 

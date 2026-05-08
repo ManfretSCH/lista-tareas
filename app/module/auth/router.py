@@ -22,7 +22,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.put('/change-password')
-def update_password(
+def change_password(
     payload: ChangePassword,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -30,4 +30,4 @@ def update_password(
     return change_password(payload.old_password, 
                            payload.new_password, 
                            current_user.email, db)
-    
+
