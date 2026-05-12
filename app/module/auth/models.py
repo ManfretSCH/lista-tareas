@@ -1,8 +1,12 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.module.task.models import Task
+
+if TYPE_CHECKING:
+    from app.module.task.models import Task
 
 
 class User(Base):
