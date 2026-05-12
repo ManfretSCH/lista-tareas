@@ -1,9 +1,10 @@
 from pydantic import BaseModel
-from typing import Optional
+
 
 class CreateTask(BaseModel):
     name: str
     description: str
+
 
 class TaskResponse(BaseModel):
     id: int
@@ -13,7 +14,7 @@ class TaskResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
 class TaskUpdate(BaseModel):
     name: str
     description: str
-

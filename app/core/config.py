@@ -1,5 +1,5 @@
 import os
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'cambia-esto-en-produccion')
-ALGORITHM = 'HS256'
+SECRET_KEY = os.getenv("SECRET_KEY", "cambia-esto-en-produccion")
+ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

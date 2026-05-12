@@ -1,42 +1,36 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.module.task.models import Task
+from app.module.task.schemas import CreateTask, TaskUpdate
 
-def get_tasks_by_id_user(id_user: int, db: Session):
-    return db.query(Task).filter(Task.user_id == id_user).all()
 
-def get_task_by_id(id_task: int, db: Session):
-    return db.query(Task).filter(Task.id == id_task).first()
+async def get_tasks_by_id_user(user_id: int, db: AsyncSession):
+    result = await db.execute(select(Task).where(Task.user_id == user_id))
+    return result.scalars().all()
 
-def create_task_repo(task_data: dict,user_id ,db: Session):
-    task_db = Task(
-        name = task_data.name,
-        description = task_data.description,
-        user_id = user_id
-    )
+
+async def create_task_repo(task_data: CreateTask, user_id, db: AsyncSession):
+    task_db = Task(name=task_data.name, description=task_data.description, user_id=user_id)
 
     db.add(task_db)
-    db.commit()
-    db.refresh(task_db)
+    await db.commit()
+    await db.refresh(task_db)
     return task_db
 
-def count_task_by_user(id_user: int, db: Session):
-    return db.query(Task).filter(Task.user_id == id_user).count()
 
-def modify_task(id_task, task: dict, db: Session):
-    task_update = db.query(Task).filter(Task.id == id_task).update(
-        {
-            Task.name: task.name,
-            Task.description: task.description
-        }
+async def count_task_by_user(user_id: int, db: AsyncSession) -> int:
+    result = await db.execute(select(func.count()).select_from(Task).where(Task.user_id == user_id))
+
+    return result.scalar() or 0
+
+
+async def modify_task(user_id: int, task_id: int, task: TaskUpdate, db: AsyncSession):
+    result = await db.execute(
+        update(Task)
+        .where(Task.id == task_id, Task.user_id == user_id)
+        .values(name=task.name, description=task.description)
     )
 
-    db.commit()
-    return task_update > 0
-
-def verify_task_for_user(user_id, task_id, db: Session):
-    if db.query(Task).filter(Task.id == task_id, 
-                             Task.user_id == user_id).first():
-        return True
-    return False
-
-
+    await db.commit()
+    return result.rowcount > 0  # type: ignore[attr-defined]
