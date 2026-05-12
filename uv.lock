@@ -580,6 +580,7 @@ dependencies = [
     { name = "bcrypt" },
     { name = "fastapi", extra = ["all"] },
     { name = "greenlet" },
+    { name = "pydantic-settings" },
     { name = "python-jose", extra = ["cryptography"] },
     { name = "sqlalchemy" },
 ]
@@ -595,6 +596,7 @@ requires-dist = [
     { name = "bcrypt", specifier = ">=5.0.0" },
     { name = "fastapi", extras = ["all"], specifier = ">=0.136.1" },
     { name = "greenlet", specifier = ">=3.5.0" },
+    { name = "pydantic-settings", specifier = ">=2.14.0" },
     { name = "python-jose", extras = ["cryptography"], specifier = ">=3.5.0" },
     { name = "sqlalchemy", specifier = ">=2.0.49" },
 ]
