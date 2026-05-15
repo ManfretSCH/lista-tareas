@@ -2,8 +2,8 @@ from pydantic import BaseModel, Field
 
 
 class CreateTask(BaseModel):
-    name: str = Field(..., min_length=8, max_length=24)
-    description: str = Field(..., min_length=20, max_length=150)
+    name: str = Field(min_length=1, max_length=80)
+    description: str = Field(max_length=500)
 
 
 class TaskResponse(BaseModel):
@@ -16,5 +16,10 @@ class TaskResponse(BaseModel):
 
 
 class TaskUpdate(BaseModel):
-    name: str
-    description: str
+    name: str = Field(min_length=1, max_length=80)
+    description: str = Field(max_length=500)
+
+
+class TaskPatch(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=80)
+    description: str | None = Field(default=None, max_length=500)

@@ -5,10 +5,12 @@ from app.module.task.repository import (
     count_task_by_user,
     create_task_repo,
     delete_task_repo,
+    get_task_by_id_task,
     get_tasks_by_id_user,
     modify_task,
+    partial_modify_task,
 )
-from app.module.task.schemas import CreateTask, TaskUpdate
+from app.module.task.schemas import CreateTask, TaskPatch, TaskUpdate
 
 
 async def list_tasks(user_id: int, db: AsyncSession):
@@ -28,7 +30,7 @@ async def task_update(user_id: int, task_id: int, task_update: TaskUpdate, db: A
     row = await modify_task(user_id, task_id, task_update, db)
     if not row:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada")
-    return await get_tasks_by_id_user(user_id, db)
+    return await get_task_by_id_task(user_id, task_id, db)
 
 
 async def task_delete(user_id: int, task_id: int, db: AsyncSession):
@@ -36,3 +38,17 @@ async def task_delete(user_id: int, task_id: int, db: AsyncSession):
 
     if not row:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tarea no encontrada")
+
+
+async def task_patch(user_id: int, task_id: int, data: TaskPatch, db: AsyncSession):
+    unset_data = data.model_dump(exclude_unset=True)
+
+    if not unset_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="no hay campos que actualizar"
+        )
+    row = await partial_modify_task(user_id, task_id, unset_data, db)
+
+    if not row:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="tarea no encontrada")
+    return await get_task_by_id_task(user_id, task_id, db)

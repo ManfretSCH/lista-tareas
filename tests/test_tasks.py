@@ -11,7 +11,7 @@ async def test_create_task(client, auth_headers):
         json={"name": "comprar pan", "description": "ir a la panaderia"},
         headers=auth_headers,
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     body = response.json()
     assert body["name"] == "comprar pan"
     assert body["id"] > 0
@@ -43,16 +43,18 @@ async def test_list_tasks_returns_created(client, auth_headers):
 
 @pytest.mark.asyncio
 async def test_update_task(client, auth_headers):
-    created = await client.post(
+    response = await client.post(
         "/tasks/",
-        json={"name": "viejo", "description": "vieja"},
+        json={"name": "copiar", "description": "tareas"},
         headers=auth_headers,
     )
-    task_id = created.json()["id"]
+    assert response.status_code == 201
+
+    task_id = response.json()["id"]
 
     response = await client.put(
         f"/tasks/{task_id}",
-        json={"name": "nuevo", "description": "nueva"},
+        json={"name": "escribir", "description": "lo que sea"},
         headers=auth_headers,
     )
     assert response.status_code == 200
@@ -75,11 +77,23 @@ async def test_task_id_invalid(client, auth_headers):
 
 
 @pytest.mark.asyncio
+async def test_create_task_invalid_name(client, auth_headers):
+    response = await client.post(
+        "/tasks/",
+        json={"name": "", "description": "que tal"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_task_of_userA_cannot_by_userB(client, auth_headers, auth_headers2):
     response_user_a = await client.post(
-        "/tasks/", json={"name": "hola", "description": "que tal"}, headers=auth_headers
+        "/tasks/",
+        json={"name": "hola", "description": "que tal"},
+        headers=auth_headers,
     )
-    assert response_user_a.status_code == 200
+    assert response_user_a.status_code == 201
 
     task_id = response_user_a.json()["id"]
 
@@ -90,3 +104,96 @@ async def test_task_of_userA_cannot_by_userB(client, auth_headers, auth_headers2
     )
     # 404 porque el service busca por (user_id, task_id): para B la task no existe.
     assert response_user_b.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_task_ok(client, auth_headers):
+    response = await client.post(
+        "/tasks/",
+        json={"name": "tarea1", "description": "qdescripcion de tarea 1"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+
+    task_id = response.json()["id"]
+
+    response = await client.delete(
+        f"/tasks/{task_id}",
+        headers=auth_headers,
+    )
+    assert response.status_code == 204
+
+
+@pytest.mark.asyncio
+async def test_task_not_found(client, auth_headers):
+    response = await client.delete(
+        "/tasks/9999",
+        headers=auth_headers,
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_delete_task_of_other_user(client, auth_headers, auth_headers2):
+    response = await client.post(
+        "/tasks/",
+        json={"name": "hola mundo", "description": ""},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+
+    task_id = response.json()["id"]
+
+    response = await client.delete(
+        f"/tasks/{task_id}",
+        headers=auth_headers2,
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_patch_task_partial(client, auth_headers):
+    response = await client.post(
+        "/tasks/",
+        json={"name": "hola", "description": "mundo"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+
+    task_id = response.json()["id"]
+
+    response = await client.patch(
+        f"/tasks/{task_id}",
+        json={"name": "come"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 200
+
+    task = response.json()
+
+    assert task["description"] == "mundo"
+
+
+@pytest.mark.asyncio
+async def test_patch_task_empty_body(client, auth_headers):
+    response = await client.post(
+        "/tasks/",
+        json={"name": "hola", "description": "mundo"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 201
+
+    task_id = response.json()["id"]
+
+    response = await client.patch(f"/tasks/{task_id}", json={}, headers=auth_headers)
+    assert response.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_patch_task_not_found(client, auth_headers):
+    response = await client.patch(
+        "/tasks/9999",
+        json={"name": "hola", "description": "mundo"},
+        headers=auth_headers,
+    )
+    assert response.status_code == 404
