@@ -1,4 +1,4 @@
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.module.task.models import Task
@@ -31,6 +31,13 @@ async def modify_task(user_id: int, task_id: int, task: TaskUpdate, db: AsyncSes
         .where(Task.id == task_id, Task.user_id == user_id)
         .values(name=task.name, description=task.description)
     )
+
+    await db.commit()
+    return result.rowcount > 0  # type: ignore[attr-defined]
+
+
+async def delete_task_repo(user_id: int, task_id: int, db: AsyncSession):
+    result = await db.execute(delete(Task).where(Task.user_id == user_id, Task.id == task_id))
 
     await db.commit()
     return result.rowcount > 0  # type: ignore[attr-defined]
