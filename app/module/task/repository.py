@@ -1,13 +1,18 @@
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.module.task.enums import TaskStatus
 from app.module.task.models import Task
 from app.module.task.schemas import CreateTask, TaskUpdate
 
 
-async def get_tasks_by_id_user(user_id: int, db: AsyncSession):
-    result = await db.execute(select(Task).where(Task.user_id == user_id))
-    return result.scalars().all()
+async def get_tasks_by_id_user(user_id: int, status: TaskStatus | None, db: AsyncSession):
+    stmt = select(Task).where(Task.user_id == user_id)
+    if status is not None:
+        stmt = stmt.where(Task.status == status)
+    result = await db.execute(stmt)
+
+    return result.scalars()
 
 
 async def get_task_by_id_task(user_id: int, task_id: int, db: AsyncSession):

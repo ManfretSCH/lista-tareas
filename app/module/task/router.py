@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import get_current_user, get_db
 from app.module.auth.models import User
+from app.module.task.enums import TaskStatus
 from app.module.task.schemas import CreateTask, TaskPatch, TaskResponse, TaskUpdate
 from app.module.task.service import create_task, list_tasks, task_delete, task_patch, task_update
 
@@ -11,9 +12,11 @@ router = APIRouter()
 
 @router.get("/", response_model=list[TaskResponse])
 async def list_task(
-    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)
+    status: TaskStatus | None = Query(default=None, description="filtro por estado"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    return await list_tasks(user_id=current_user.id, db=db)
+    return await list_tasks(user_id=current_user.id, status=status, db=db)
 
 
 @router.post("/", response_model=TaskResponse, status_code=201)

@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.module.task.enums import TaskStatus
 from app.module.task.repository import (
     count_task_by_user,
     create_task_repo,
@@ -13,8 +14,8 @@ from app.module.task.repository import (
 from app.module.task.schemas import CreateTask, TaskPatch, TaskUpdate
 
 
-async def list_tasks(user_id: int, db: AsyncSession):
-    return await get_tasks_by_id_user(user_id, db)
+async def list_tasks(user_id: int, status: TaskStatus | None, db: AsyncSession):
+    return await get_tasks_by_id_user(user_id, status, db)
 
 
 async def create_task(task: CreateTask, user_id: int, db: AsyncSession):
